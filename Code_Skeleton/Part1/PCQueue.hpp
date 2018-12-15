@@ -3,6 +3,7 @@
 #include "Headers.hpp"
 #include "Semaphore.hpp"
 
+
 // Single Producer - Multiple Consumer queue
 template <typename T>
 class PCQueue
@@ -23,9 +24,11 @@ public:
 private:
 	// Add your class members here
 	Semaphore s;
-    pthread_mutex_t m1;
-    pthread_mutex_t m2;
+    pthread_mutex_t m;
+    Semaphore writers_lock;
+    pthread_cond_t is_writer_waiting;
     std::queue<T> q;
+    int writers_waiting;
 };
 // Recommendation: Use the implementation of the std::queue for this exercise
 #endif

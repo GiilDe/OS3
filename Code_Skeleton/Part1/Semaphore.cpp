@@ -17,7 +17,7 @@ Semaphore::Semaphore(unsigned val){
 
 void Semaphore::down() {
     pthread_mutex_lock(&m);
-    while(val <= 0){
+    while(val == 0){
         pthread_cond_wait(&cond, &m);
     }
     val--;
