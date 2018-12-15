@@ -22,13 +22,17 @@ public:
 	PCQueue();
 
 private:
-	// Add your class members here
 	Semaphore s;
     pthread_mutex_t m;
-    Semaphore writers_lock;
-    pthread_cond_t is_writer_waiting;
+    pthread_cond_t writers;
+    pthread_cond_t readers;
     std::queue<T> q;
     int writers_waiting;
+    int inside;
+
+    void push_lock();
+    void pop_lock();
+    void unlock();
 };
 // Recommendation: Use the implementation of the std::queue for this exercise
 #endif
