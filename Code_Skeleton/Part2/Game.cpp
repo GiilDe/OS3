@@ -1,9 +1,19 @@
-#include <Game.hpp>
+
+#include "Game.hpp"
+
 /*--------------------------------------------------------------------------------
 								
 --------------------------------------------------------------------------------*/
-void Game::run() {
 
+Game::Game(game_params g){
+    game_field = new Game_field(utils::read_lines(g.filename));
+    interactive_on = g.interactive_on;
+    print_on = g.print_on;
+    m_gen_num = g.n_gen;
+    m_thread_num = std::min(g.n_thread, game_field->field.size());
+}
+
+void Game::run() {
 	_init_game(); // Starts the threads and all other variables you need
 	print_board("Initial Board");
 	for (uint i = 0; i < m_gen_num; ++i) {
@@ -22,12 +32,37 @@ void Game::_init_game() {
 	// Create game fields
 	// Start the threads
 	// Testing of your implementation will presume all threads are started here
+	for (int i = 0; i < m_thread_num; ++i) {
+		Thread* t = new Game_thread(uint(i), &jobs);
+		m_threadpool[i] = t;
+	}
+
+    current, next = game_field;
+    for(Thread* t : m_threadpool){
+        t->start();
+    }
 }
 
 void Game::_step(uint curr_gen) {
 	// Push jobs to queue
 	// Wait for the workers to finish calculating 
-	// Swap pointers between current and next field 
+	// Swap pointers between current and next field
+    int height = game_field->field.size();
+    int job_size = height/m_thread_num;
+    for (int i = 0; i < m_thread_num; ++i){
+        int last = i + job_size;
+        if(i == m_thread_num - 1){
+            last = height-1;
+        }
+        Job j(i, last, game_field);
+        jobs.push(j);
+    }
+    for(Thread* t : m_threadpool){
+        t->join();
+    }
+    Game_field* temp = current;
+    next = temp;
+    current = next;
 }
 
 void Game::_destroy_game(){

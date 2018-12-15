@@ -16,8 +16,10 @@ template <typename T>
 T PCQueue<T>::pop() {
     s.down();
     pop_lock();
-    T data = q.pop();
+    T data = q.front();
+    q.pop();
     unlock();
+    return data;
 }
 
 template <typename T>

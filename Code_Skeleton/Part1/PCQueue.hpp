@@ -1,7 +1,7 @@
 #ifndef _QUEUEL_H
 #define _QUEUEL_H
+
 #include "Headers.hpp"
-#include "Semaphore.hpp"
 
 
 // Single Producer - Multiple Consumer queue
@@ -20,6 +20,10 @@ public:
 	void push(const T& item); 
 
 	PCQueue();
+
+	bool empty(){
+		return q.empty();
+	};
 
 private:
 	Semaphore s;
