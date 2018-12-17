@@ -1,7 +1,8 @@
 //
 // Created by Gilad on 14-Dec-18.
 //
-#include "PCQueue.hpp"
+
+#include "Headers.hpp"
 
 template <typename T>
 PCQueue<T>::PCQueue() : s(0){

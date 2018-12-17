@@ -2,7 +2,7 @@
 // Created by Gilad on 15-Dec-18.
 //
 
-#include "Game_thread.hpp"
+#include "../Part1/Headers.hpp"
 
 Game_thread::Game_thread(uint id, PCQueue<Job>* jobs) : Thread(id){
     this->jobs = jobs;

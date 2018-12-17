@@ -2,8 +2,6 @@
 #define __GAMERUN_H
 
 #include "../Part1/Headers.hpp"
-#include "Thread.hpp"
-#include "Game_field.hpp"
 
 /*--------------------------------------------------------------------------------
 								  Auxiliary Structures
@@ -47,8 +45,8 @@ protected: // All members here are protected, instead of private for testing pur
 	bool interactive_on; // Controls interactive mode - that means, prints the board as an animation instead of a simple dump to STDOUT 
 	bool print_on; // Allows the printing of the board. Turn this off when you are checking performance (Dry 3, last question)
 	// TODO: Add in your variables and synchronization primitives
-    Game_field *current, *next;
-	Game_field* game_field;
+    Game_field *current_field, *next_field;
     PCQueue<Job> jobs;
+	string filename;
 };
 #endif

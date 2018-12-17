@@ -6,11 +6,10 @@
 --------------------------------------------------------------------------------*/
 
 Game::Game(game_params g){
-    game_field = new Game_field(utils::read_lines(g.filename));
     interactive_on = g.interactive_on;
     print_on = g.print_on;
     m_gen_num = g.n_gen;
-    m_thread_num = std::min(g.n_thread, game_field->field.size());
+    filename = g.filename;
 }
 
 void Game::run() {
@@ -36,8 +35,9 @@ void Game::_init_game() {
 		Thread* t = new Game_thread(uint(i), &jobs);
 		m_threadpool[i] = t;
 	}
-
-    current, next = game_field;
+    current_field = new Game_field(utils::read_lines(filename));
+    next_field = new Game_field(utils::read_lines(filename));
+    m_thread_num = std::min(m_thread_num, current_field->field.size());
     for(Thread* t : m_threadpool){
         t->start();
     }
@@ -47,28 +47,43 @@ void Game::_step(uint curr_gen) {
 	// Push jobs to queue
 	// Wait for the workers to finish calculating 
 	// Swap pointers between current and next field
-    int height = game_field->field.size();
+    int height = current_field->field.size();
     int job_size = height/m_thread_num;
+    vector<Lock> locks(m_thread_num-1, Lock());
     for (int i = 0; i < m_thread_num; ++i){
+        Lock* lower_p;
+        Lock* upper_p;
+        if(i == 0){
+            lower_p = NULL;
+        }
+        else{
+            lower_p = &locks[i-1];
+        }
         int last = i + job_size;
         if(i == m_thread_num - 1){
             last = height-1;
+            upper_p = NULL;
         }
-        Job j(i, last, game_field);
+        else{
+            upper_p = &locks[i];
+        }
+        Job j(uint(i), uint(last), current_field, next_field, lower_p, upper_p);
         jobs.push(j);
     }
     for(Thread* t : m_threadpool){
         t->join();
     }
-    Game_field* temp = current;
-    next = temp;
-    current = next;
+    Game_field* temp = current_field;
+    next_field = temp;
+    current_field = next_field;
 }
 
 void Game::_destroy_game(){
 	// Destroys board and frees all threads and resources 
 	// Not implemented in the Game's destructor for testing purposes. 
 	// Testing of your implementation will presume all threads are joined here
+    delete current_field;
+    delete next_field;
 }
 
 /*--------------------------------------------------------------------------------

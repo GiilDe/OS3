@@ -1,5 +1,7 @@
+
 #ifndef __SEMAPHORE_H
 #define __SEMAPHORE_H
+
 #include "Headers.hpp"
 
 // Synchronization Warm up 

@@ -31,6 +31,10 @@
 #include "../Part2/Game_thread.hpp"
 #include "../Part2/utils.hpp"
 #include "../Part2/Job.hpp"
+#include "../Part2/Lock.hpp"
+#include "../Part2/Game_field.hpp"
+#include "../Part2/Thread.hpp"
+
 
 /*--------------------------------------------------------------------------------
 									   Typedefs
@@ -38,6 +42,7 @@
 using std::string;
 using std::vector;
 using std::queue;
+
 
 using std::ostream;
 using std::ifstream;

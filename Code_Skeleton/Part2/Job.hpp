@@ -10,17 +10,24 @@
 
 class Job {
 public:
-    Job(int lower, int upper, Game_field* game_field){
+    Job(uint lower, uint upper, Game_field* current, Game_field* next, Lock* lower_s,
+        Lock* upper_s){
         lower_row = lower;
         upper_row = upper;
-        field = game_field;
+        this->current = current;
+        this->next = next;
+        this->lower_lock = lower_s;
+        this->upper_lock = upper_s;
     }
     void run();
 
 private:
-    int lower_row;
-    int upper_row;
-    Game_field* field;
+    uint lower_row;
+    uint upper_row;
+    Game_field* current;
+    Game_field* next;
+    Lock* lower_lock;
+    Lock* upper_lock;
 };
 
 
