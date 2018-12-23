@@ -1,9 +1,46 @@
 
 #include "Game.hpp"
+#include "Thread.hpp"
+#include "GameThread.hpp"
+#include "utils.hpp"
 
 /*--------------------------------------------------------------------------------
 								
 --------------------------------------------------------------------------------*/
+inline static void print_board(const char* header) {
+    if(print_on) {
+
+        // Clear the screen, to create a running animation
+        if(interactive_on)
+            system("clear");
+
+        // Print small header if needed
+        if (header != NULL)
+            cout << "<------------" << header << "------------>" << endl;
+
+        // TODO: Print the board
+
+        // Display for GEN_SLEEP_USEC micro-seconds on screen
+        if(interactive_on)
+            usleep(GEN_SLEEP_USEC);
+    }
+}
+
+
+/* Function sketch to use for printing the board. You will need to decide its placement and how exactly
+	to bring in the field's parameters.
+
+		cout << u8"╔" << string(u8"═") * field_width << u8"╗" << endl;
+		for (uint i = 0; i < field_height ++i) {
+			cout << u8"║";
+			for (uint j = 0; j < field_width; ++j) {
+				cout << (field[i][j] ? u8"█" : u8"░");
+			}
+			cout << u8"║" << endl;
+		}
+		cout << u8"╚" << string(u8"═") * field_width << u8"╝" << endl;
+*/
+
 
 Game::Game(game_params g){
     interactive_on = g.interactive_on;
@@ -32,12 +69,12 @@ void Game::_init_game() {
 	// Start the threads
 	// Testing of your implementation will presume all threads are started here
 	for (int i = 0; i < m_thread_num; ++i) {
-		Thread* t = new Game_thread(uint(i), &jobs);
+		Thread* t = new GameThread(uint(i), &jobs);
 		m_threadpool[i] = t;
 	}
-    current_field = new Game_field(utils::read_lines(filename));
-    next_field = new Game_field(utils::read_lines(filename));
-    m_thread_num = std::min(m_thread_num, current_field->field.size());
+    current_field = new GameField(utils::read_lines(filename));
+    next_field = new GameField(utils::read_lines(filename));
+    m_thread_num = std::min(m_thread_num, (uint)current_field->field.size());
     for(Thread* t : m_threadpool){
         t->start();
     }
@@ -73,7 +110,7 @@ void Game::_step(uint curr_gen) {
     for(Thread* t : m_threadpool){
         t->join();
     }
-    Game_field* temp = current_field;
+    GameField* temp = current_field;
     next_field = temp;
     current_field = next_field;
 }
@@ -86,44 +123,21 @@ void Game::_destroy_game(){
     delete next_field;
 }
 
-/*--------------------------------------------------------------------------------
-								
---------------------------------------------------------------------------------*/
-inline static void print_board(const char* header) {
-
-	if(print_on){ 
-
-		// Clear the screen, to create a running animation 
-		if(interactive_on)
-			system("clear");
-
-		// Print small header if needed
-		if (header != NULL)
-			cout << "<------------" << header << "------------>" << endl;
-		
-		// TODO: Print the board 
-
-		// Display for GEN_SLEEP_USEC micro-seconds on screen 
-		if(interactive_on)
-			usleep(GEN_SLEEP_USEC);
-	}
-
+// TODO Implement
+const vector<float> Game::gen_hist() const {
+    vector<float> v;
+    return v;
 }
 
+// TODO Implement
+const vector<float> Game::tile_hist() const {
+    vector<float> v;
+    return v;
+}
 
-/* Function sketch to use for printing the board. You will need to decide its placement and how exactly 
-	to bring in the field's parameters. 
-
-		cout << u8"╔" << string(u8"═") * field_width << u8"╗" << endl;
-		for (uint i = 0; i < field_height ++i) {
-			cout << u8"║";
-			for (uint j = 0; j < field_width; ++j) {
-				cout << (field[i][j] ? u8"█" : u8"░");
-			}
-			cout << u8"║" << endl;
-		}
-		cout << u8"╚" << string(u8"═") * field_width << u8"╝" << endl;
-*/ 
-
+// TODO Implement
+uint Game::thread_num() const {
+    return 0;
+}
 
 

@@ -2,7 +2,7 @@
 // Created by Miki Mints on 12/18/18.
 //
 
-#include "../Code_Skeleton/Part1/PCQueue.hpp"
+#include "../PCQueue.hpp"
 #include "macros.h"
 #include <algorithm>
 

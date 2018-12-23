@@ -5,13 +5,13 @@
 #ifndef OS3_JOB_HPP
 #define OS3_JOB_HPP
 
-#include "../Part1/Headers.hpp"
-#include "Game_field.hpp"
+#include "Headers.hpp"
+#include "GameField.hpp"
+#include "Lock.hpp"
 
 class Job {
 public:
-    Job(uint lower, uint upper, Game_field* current, Game_field* next, Lock* lower_s,
-        Lock* upper_s){
+    Job (uint lower, uint upper, GameField* current, GameField* next, Lock* lower_s, Lock* upper_s) {
         lower_row = lower;
         upper_row = upper;
         this->current = current;
@@ -24,8 +24,8 @@ public:
 private:
     uint lower_row;
     uint upper_row;
-    Game_field* current;
-    Game_field* next;
+    GameField* current;
+    GameField* next;
     Lock* lower_lock;
     Lock* upper_lock;
 };

@@ -4,7 +4,6 @@
 
 #include "Job.hpp"
 
-
 void Job::run() {
     uint width = current->get_width();
     uint height = current->get_height();

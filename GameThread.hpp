@@ -5,13 +5,13 @@
 #ifndef OS3_GAME_THREAD_H
 #define OS3_GAME_THREAD_H
 
-#include "../Part1/Headers.hpp"
+#include "Headers.hpp"
 #include "Thread.hpp"
 #include "Job.hpp"
 
-class Game_thread : public Thread{
+class GameThread : public Thread {
 public:
-    Game_thread(uint id, PCQueue<Job>* jobs);
+    GameThread(uint id, PCQueue<Job>* jobs);
 private:
     PCQueue<Job>* jobs;
     void thread_workload() override;

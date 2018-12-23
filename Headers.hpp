@@ -28,18 +28,7 @@
 /*--------------------------------------------------------------------------------
 									   Typedefs
 --------------------------------------------------------------------------------*/
-using std::string;
-using std::vector;
-using std::queue;
-
-using std::ostream;
-using std::ifstream;
-using std::fstream;
-using std::istringstream;
-using std::chrono::time_point;
-using std::cout;
-using std::cerr;
-using std::endl;
+using namespace std;
 
 typedef unsigned int uint;
 typedef vector<vector<bool>> bool_mat;

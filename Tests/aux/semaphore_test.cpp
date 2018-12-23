@@ -1,4 +1,4 @@
-#include "../../Code_Skeleton/Part1/Semaphore.hpp"
+#include "../../Semaphore.hpp"
 struct s_semaphore{
     Semaphore* s;
     pthread_mutex_t m;
