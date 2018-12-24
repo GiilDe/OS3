@@ -7,17 +7,15 @@
 #include "Headers.hpp"
 
 class GameField {
+private:
+    uint width, height;
 public:
     vector<vector<bool>> field;
 
-    explicit GameField(vector<string> matrix);
-    uint get_height(){
-        return (uint)field.size();
-    }
-
-    uint get_width(){
-        return (uint)field[0].size();
-    }
+    explicit GameField(vector<vector<bool>>& matrix, uint width, uint height);
+    uint get_height();
+    uint get_width();
+    vector<bool>& operator[](int i);
 };
 
 #endif //OS3_GAME_FIELD_HPP

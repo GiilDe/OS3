@@ -3,16 +3,21 @@
 //
 
 #include "GameField.hpp"
+#include "utils.hpp"
 
-GameField::GameField(vector<string> matrix) :
-        field(matrix.size(), vector<bool>((matrix[0].size()+1)/2)){
+GameField::GameField(vector<vector<bool>>& matrix, uint width, uint height) :
+        field(matrix), width(width), height(height) {
 
-    for (int i = 0; i < matrix.size(); ++i) {
-        uint counter = 0;
-        for (int j = 0; j < (matrix[0].size()+1)/2; ++j) {
-            field[i][j] = matrix[i].at(counter);
-            counter += 2;
-        }
-    }
+}
 
+uint GameField::get_height() {
+    return width;
+}
+
+uint GameField::get_width(){
+    return height;
+}
+
+vector<bool>& GameField::operator[](int i) {
+    return field[i];
 }
