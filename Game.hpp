@@ -22,6 +22,8 @@ struct game_params {
 									Class Declaration
 --------------------------------------------------------------------------------*/
 class Game {
+private:
+    void print_board(const char* header) const;
 public:
 
 	Game(game_params);
@@ -33,6 +35,10 @@ public:
 
 
 protected: // All members here are protected, instead of private for testing purposes
+
+    // Implementation
+    int field_width;
+	int field_height;
 
 	// See Game.cpp for details on these three functions
 	void _init_game(); 
@@ -50,7 +56,7 @@ protected: // All members here are protected, instead of private for testing pur
 	bool print_on; // Allows the printing of the board. Turn this off when you are checking performance (Dry 3, last question)
 	// TODO: Add in your variables and synchronization primitives
     GameField *current_field, *next_field;
-    PCQueue<Job> jobs;
+    PCQueue<Job*> jobs;
 	string filename;
 };
 #endif

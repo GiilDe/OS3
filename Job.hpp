@@ -29,6 +29,15 @@ private:
     GameField* next;
     vector<Lock*> lower_locks;
     vector<Lock*> upper_locks;
+
+    /**
+     * Count the number of live neighbors of a given cell for the current state of the job's board
+     * @param i Cell's x coordinate
+     * @param j Cell's y coordinate
+     * @return Number of live cells which are neighbors to (i,j).
+     * Cells out of bound of the given board are considered dead
+     */
+    int countNeighbors(int i, int j);
 };
 
 

@@ -4,13 +4,20 @@
 #include "PCQueue.hpp"
 #include "GameThread.hpp"
 
-GameThread::GameThread(uint id, PCQueue<Job>* jobs) : Thread(id){
+GameThread::GameThread(uint id, PCQueue<Job*>* jobs) : Thread(id), my_jobs() {
     this->jobs = jobs;
 }
 
 void GameThread::thread_workload() {
     while(!jobs->empty()){
-        Job j = jobs->pop();
-        j.run();
+        Job* j = jobs->pop();
+        my_jobs.push_back(j);
+        j->run();
+    }
+}
+
+GameThread::~GameThread() {
+    for(Job *j : my_jobs) {
+        delete j;
     }
 }
