@@ -11,9 +11,12 @@
 
 class GameThread : public Thread {
 public:
-    GameThread(uint id, PCQueue<Job>* jobs);
+    ~GameThread() override;
+
+    GameThread(uint id, PCQueue<Job*>* jobs);
 private:
-    PCQueue<Job>* jobs;
+    PCQueue<Job*>* jobs;
+    vector<Job*> my_jobs;
     void thread_workload() override;
 };
 

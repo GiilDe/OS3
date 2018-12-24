@@ -11,14 +11,7 @@
 
 class Job {
 public:
-    Job (uint lower, uint upper, GameField* current, GameField* next, Lock* lower_s, Lock* upper_s) {
-        lower_row = lower;
-        upper_row = upper;
-        this->current = current;
-        this->next = next;
-        this->lower_lock = lower_s;
-        this->upper_lock = upper_s;
-    }
+    Job (uint lower, uint upper, GameField* current, GameField* next, Lock* lower_s, Lock* upper_s);
     void run();
 
 private:
@@ -28,6 +21,15 @@ private:
     GameField* next;
     Lock* lower_lock;
     Lock* upper_lock;
+
+    /**
+     * Count the number of live neighbors of a given cell for the current state of the job's board
+     * @param i Cell's x coordinate
+     * @param j Cell's y coordinate
+     * @return Number of live cells which are neighbors to (i,j).
+     * Cells out of bound of the given board are considered dead
+     */
+    int countNeighbors(int i, int j);
 };
 
 
