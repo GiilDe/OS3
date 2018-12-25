@@ -44,7 +44,7 @@ void Game::run() {
     for (uint i = 0; i < m_gen_num; ++i) {
         auto gen_start = std::chrono::system_clock::now();
         _step(i); // Iterates a single generation
-        if(i != m_gen_num-1){ //step killed all threads, if this is not the last
+        if(i != m_gen_num - 1){ //step killed all threads, if this is not the last
             start_all_threads();//iteration, start them again
         }
         auto gen_end = std::chrono::system_clock::now();
@@ -128,7 +128,7 @@ void Game::_destroy_game() {
     // Testing of your implementation will presume all threads are joined here
     delete current_field;
     delete next_field;
-    for (int i = 0; i < m_thread_num; ++i) { //delete the threads
+    for (int i = 0; i < m_thread_num; ++i) {
         delete m_threadpool[i];
     }
 }
