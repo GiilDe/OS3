@@ -167,7 +167,7 @@ using std::exception;
 #define CHILD_PROCESS(pid) \
     (pid == 0)
 
-#define WAIT_CHILD(stat_variable) \
+#define WAIT_FOR_CHILD(stat_variable) \
     wait(&(stat_variable)); \
     if (stat_variable) { \
         return false; \

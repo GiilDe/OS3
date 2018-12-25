@@ -43,7 +43,9 @@ protected: // All members here are protected, instead of private for testing pur
 	// See Game.cpp for details on these three functions
 	void _init_game(); 
 	void _step(uint curr_gen); 
-	void _destroy_game(); 
+	void _destroy_game();
+	void start_all_threads();
+	void wait_for_threads();
 
 	uint m_gen_num; 			 // The number of generations to run
 	uint m_thread_num; 			 // Effective number of threads = min(thread_num, field_height)
@@ -58,5 +60,6 @@ protected: // All members here are protected, instead of private for testing pur
     GameField *current_field, *next_field;
     PCQueue<Job*> jobs;
 	string filename;
+
 };
 #endif
