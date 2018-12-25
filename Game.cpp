@@ -3,35 +3,38 @@
 #include "Thread.hpp"
 #include "GameThread.hpp"
 #include "utils.hpp"
+#include "TerminatingJob.hpp"
 
 /*--------------------------------------------------------------------------------
 								
 --------------------------------------------------------------------------------*/
 
 
-Game::Game(game_params g) : m_gen_hist(), m_tile_hist(), m_threadpool() {
-    interactive_on = g.interactive_on;
-    print_on = g.print_on;
-    m_gen_num = g.n_gen;
-    filename = g.filename;
-    m_thread_num = g.n_thread;
+/* Function sketch to use for printing the board. You will need to decide its placement and how exactly
+	to bring in the field's parameters.
 
-    vector<string> lines = utils::read_lines(filename);
-    field_width = (int) utils::split(lines[0], ' ').size();
-    field_height = (int) lines.size();
-}
+		cout << u8"╔" << string(u8"═") * field_width << u8"╗" << endl;
+		for (uint i = 0; i < field_height ++i) {
+			cout << u8"║";
+			for (uint j = 0; j < field_width; ++j) {
+				cout << (field[i][j] ? u8"█" : u8"░");
+			}
+			cout << u8"║" << endl;
+		}
+		cout << u8"╚" << string(u8"═") * field_width << u8"╝" << endl;
+*/
 
-void Game::start_all_threads(){
-    for (int i = 0; i < m_thread_num; ++i) {
-        Thread* t = m_threadpool[i];
-        t->start();
-    }
-}
 
-void Game::wait_for_threads(){
-    for (Thread *t : m_threadpool) {
-        t->join();
-    }
+Game::Game(game_params g) :
+        m_gen_hist(),
+        m_tile_hist(),
+        m_threadpool(),
+        interactive_on(g.interactive_on),
+        print_on(g.print_on),
+        m_gen_num(g.n_gen),
+        filename(g.filename),
+        m_thread_num(g.n_thread),
+        tile_lock() {
 }
 
 Game::~Game() {
@@ -58,60 +61,81 @@ void Game::_init_game() {
     // Create game fields
     // Start the threads
     // Testing of your implementation will presume all threads are started here
+    bool_mat field;
     vector<string> lines = utils::read_lines(filename);
-    vector<vector<bool>> field;
-    for (int i = 0; i < lines.size(); ++i) {
-        vector<string> line = utils::split(lines[i], ' ');
+    for (const string& str_line : lines) {
+        vector<string> line = utils::split(str_line, ' ');
         vector<bool> line_vec;
-        for (string str : line) {
-            int bit = stoi(str, nullptr, 10);
-            bool flag = (bool) bit;
-            line_vec.push_back(flag);
+        for (const string& str : line) {
+            line_vec.push_back((bool) stoi(str, nullptr, 10));
         }
         field.push_back(line_vec);
     }
-    current_field = new GameField(field, field_width, field_height);
-    next_field = new GameField(field, field_width, field_height);
-    m_thread_num = std::min(m_thread_num, (uint) current_field->field.size());
-    for (int i = 0; i < m_thread_num; ++i) {
-        m_threadpool.push_back(new GameThread(uint(i), &jobs, &m_tile_hist,
-                                              &m_tile_hist_lock));
+    field_width = (int) utils::split(lines[0], ' ').size();
+    field_height = (int) lines.size();
+
+    current_field = new bool_mat(field);
+    next_field = new bool_mat((uint)field_height, vector<bool>((uint)field_width));
+
+    for (int i = 0; i < thread_num(); ++i) {
+        m_threadpool.push_back(new GameThread(uint(i), &jobs, &tile_lock, &m_tile_hist));
     }
     start_all_threads();
+}
+
+void Game::start_all_threads() {
+    for (int i = 0; i < thread_num(); ++i) {
+        Thread *t = m_threadpool[i];
+        t->start();
+    }
+}
+
+void Game::wait_for_threads() {
+
 }
 
 void Game::_step(uint curr_gen) {
     // Push jobs to queue
     // Wait for the workers to finish calculating
     // Swap pointers between current and next field
-    auto height = current_field->get_height();
-    auto width = current_field->get_width();
-    int job_size = height / m_thread_num;
-    int start = 0;
-    int last = job_size - 1;
-    for (int i = 0; i < m_thread_num; ++i) {
-        if (i == m_thread_num - 1) {
-            last = height - 1;
-            //making sure the upper row of the last job is height-1
-        } else {
+    int job_size = (uint)field_height / thread_num();
+
+    uint start = 0;
+    uint last = (uint)job_size - 1;
+
+    for (int i = 0; i < thread_num(); ++i) {
+        if (i == thread_num() - 1) {
+            last = (uint)field_height - 1;
         }
         auto *j = new Job(uint(start), uint(last), current_field, next_field);
         jobs.push(j);
         start = last + 1;
         last += job_size;
     }
-    start_all_threads();
+
+    // Wait for the job queue to empty
     wait_for_threads();
-    GameField *temp = next_field;
+    while(!jobs.empty());
+
+    // Swap the current and next boards
+    bool_mat *temp = next_field;
     next_field = current_field;
     current_field = temp;
+
+    // Push thread_num() jobs to the queue, which signal the threads that they should terminate
+    // This is because we want the threads to stop working when m_gen_num generations are exceeded
+    if(curr_gen == m_gen_num - 1) {
+        for (int i = 0; i < thread_num(); ++i) {
+            jobs.push(new TerminatingJob());
+        }
+    }
 }
 
 void Game::_destroy_game() {
     // Destroys board and frees all threads and resources
     // Not implemented in the Game's destructor for testing purposes.
     // Testing of your implementation will presume all threads are joined here
-    for (Thread *t : m_threadpool) {
+    for(Thread *t : m_threadpool) {
         t->join();
         delete t;
     }
@@ -129,7 +153,7 @@ const vector<float> Game::tile_hist() const {
 
 // TODO Test
 uint Game::thread_num() const {
-    return (uint) m_threadpool.size();
+    return std::min(m_thread_num, (uint) field_height);
 }
 
 void Game::print_board(const char *header) const {

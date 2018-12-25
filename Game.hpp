@@ -3,7 +3,6 @@
 
 #include "Headers.hpp"
 #include "Thread.hpp"
-#include "GameField.hpp"
 #include "Job.hpp"
 #include "PCQueue.hpp"
 
@@ -37,10 +36,6 @@ public:
 
 protected: // All members here are protected, instead of private for testing purposes
 
-    // Implementation
-    int field_width;
-	int field_height;
-
 	// See Game.cpp for details on these three functions
 	void _init_game(); 
 	void _step(uint curr_gen); 
@@ -57,10 +52,13 @@ protected: // All members here are protected, instead of private for testing pur
 
 	bool interactive_on; // Controls interactive mode - that means, prints the board as an animation instead of a simple dump to STDOUT 
 	bool print_on; // Allows the printing of the board. Turn this off when you are checking performance (Dry 3, last question)
-	// TODO: Add in your variables and synchronization primitives
-    GameField *current_field, *next_field;
+
+	// Implementation
+	int field_width;
+	int field_height;
+	bool_mat *current_field, *next_field;
     PCQueue<Job*> jobs;
 	string filename;
-	bool finished;
+	Lock tile_lock;
 };
 #endif

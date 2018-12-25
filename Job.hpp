@@ -6,19 +6,18 @@
 #define OS3_JOB_HPP
 
 #include "Headers.hpp"
-#include "GameField.hpp"
 #include "Lock.hpp"
 
 class Job {
 public:
-    Job (uint lower, uint upper, GameField* current, GameField* next);
-    void run();
+    Job (uint lower, uint upper, bool_mat* current, bool_mat* next);
+    virtual void run();
 
 private:
     uint lower_row;
     uint upper_row;
-    GameField* current;
-    GameField* next;
+    bool_mat* current;
+    bool_mat* next;
 
     /**
      * Count the number of live neighbors of a given cell for the current state of the job's board

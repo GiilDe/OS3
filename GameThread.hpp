@@ -9,17 +9,18 @@
 #include "Thread.hpp"
 #include "Job.hpp"
 
-class GameThread : public Thread{
+class GameThread : public Thread {
 public:
     ~GameThread() override;
-    GameThread(uint id, PCQueue<Job*>* jobs, vector<float>* tile_hist,
-               Lock* tile_hist_lock);
+
+    GameThread(uint id, PCQueue<Job *> *jobs, Lock *tile_lock, vector<float>* tile_hist);
 
 private:
-    PCQueue<Job*>* jobs;
-    vector<Job*> my_jobs;
-    Lock* tile_hist_lock;
-    vector<float>* tile_hist;
+    Lock *tile_lock;
+    PCQueue<Job *> *jobs;
+    vector<Job *> my_jobs;
+    vector<float> *tile_hist;
+
     void thread_workload() override;
 };
 

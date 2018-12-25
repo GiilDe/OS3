@@ -85,11 +85,14 @@ string testGameBasicThreads(uint threads) {
 
     END_REDIRECT_COUT();
     string out = cout_redir_str();
+    sleep(3);
     return out;
 }
 
 bool testGameBasic1() {
-    ASSERT_EQUALS(testGameBasicThreads(1), small_board_expected);
+    string str1 = testGameBasicThreads(1);
+    string str2 = small_board_expected;
+    ASSERT_EQUALS(str1, str2);
     return true;
 }
 
@@ -103,12 +106,34 @@ bool testGameBasic3() {
     return true;
 }
 
+bool testGameBasic4() {
+    ASSERT_EQUALS(testGameBasicThreads(10), small_board_expected);
+    return true;
+}
+
+bool testGameBasic5() {
+    ASSERT_EQUALS(testGameBasicThreads(20), small_board_expected);
+    return true;
+}
+
+bool testGameBasic6() {
+    ASSERT_EQUALS(testGameBasicThreads(40), small_board_expected);
+    return true;
+}
+
 int main() {
     RUN_TEST(testThreadWrapper);
+    sleep(1);
     RUN_TEST(testGameBasic1);
-    sleep(5);
+    sleep(1);
     RUN_TEST(testGameBasic2);
-    sleep(5);
+    sleep(1);
     RUN_TEST(testGameBasic3);
+    sleep(1);
+    RUN_TEST(testGameBasic4);
+    sleep(1);
+    RUN_TEST(testGameBasic5);
+    sleep(1);
+    RUN_TEST(testGameBasic6);
     return 0;
 }
