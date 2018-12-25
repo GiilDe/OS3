@@ -9,21 +9,6 @@
 --------------------------------------------------------------------------------*/
 
 
-/* Function sketch to use for printing the board. You will need to decide its placement and how exactly
-	to bring in the field's parameters.
-
-		cout << u8"╔" << string(u8"═") * field_width << u8"╗" << endl;
-		for (uint i = 0; i < field_height ++i) {
-			cout << u8"║";
-			for (uint j = 0; j < field_width; ++j) {
-				cout << (field[i][j] ? u8"█" : u8"░");
-			}
-			cout << u8"║" << endl;
-		}
-		cout << u8"╚" << string(u8"═") * field_width << u8"╝" << endl;
-*/
-
-
 Game::Game(game_params g) : m_gen_hist(), m_tile_hist(), m_threadpool() {
     interactive_on = g.interactive_on;
     print_on = g.print_on;
@@ -34,6 +19,19 @@ Game::Game(game_params g) : m_gen_hist(), m_tile_hist(), m_threadpool() {
     vector<string> lines = utils::read_lines(filename);
     field_width = (int) utils::split(lines[0], ' ').size();
     field_height = (int) lines.size();
+}
+
+void Game::start_all_threads(){
+    for (int i = 0; i < m_thread_num; ++i) {
+        Thread* t = m_threadpool[i];
+        t->start();
+    }
+}
+
+void Game::wait_for_threads(){
+    for (Thread *t : m_threadpool) {
+        t->join();
+    }
 }
 
 Game::~Game() {
@@ -76,12 +74,10 @@ void Game::_init_game() {
     next_field = new GameField(field, field_width, field_height);
     m_thread_num = std::min(m_thread_num, (uint) current_field->field.size());
     for (int i = 0; i < m_thread_num; ++i) {
-        m_threadpool.push_back(new GameThread(uint(i), &jobs));
+        m_threadpool.push_back(new GameThread(uint(i), &jobs, &m_tile_hist,
+                                              &m_tile_hist_lock));
     }
-//    for (int i = 0; i < m_thread_num; ++i) {
-//        Thread *t = m_threadpool[i];
-//        t->start();
-//    }
+    start_all_threads();
 }
 
 void Game::_step(uint curr_gen) {
@@ -91,44 +87,21 @@ void Game::_step(uint curr_gen) {
     auto height = current_field->get_height();
     auto width = current_field->get_width();
     int job_size = height / m_thread_num;
-//    vector<vector<Lock>> locks(m_thread_num - 1);
-//    for(int i = 0; i < height; i++) {
-//        locks.push_back(vector<Lock>());
-//        for(int j = 0; j < width; j++) {
-//            locks[i].push_back(Lock());
-//        }
-//    }
     int start = 0;
     int last = job_size - 1;
     for (int i = 0; i < m_thread_num; ++i) {
-//        vector<Lock *> lower_p(width, nullptr);
-//        vector<Lock *> upper_p(width, nullptr);
-//        if (i != 0) { //if we are in the first job no need to lock...
-//            for (int k = 0; k < width; ++k) { //...lower_p (keep them NULL)
-//                lower_p[k] = &locks[i - 1][k];
-//            }
-//        }
-        if (i == m_thread_num - 1) { //if we are in the last job no need...
-            last = height - 1;       //...to lock upper_p (keep them NULL)
+        if (i == m_thread_num - 1) {
+            last = height - 1;
             //making sure the upper row of the last job is height-1
         } else {
-//            for (int k = 0; k < width; ++k) {
-//                upper_p[k] = &locks[i][k];
-//            }
         }
         auto *j = new Job(uint(start), uint(last), current_field, next_field);
         jobs.push(j);
         start = last + 1;
         last += job_size;
     }
-    for (int i = 0; i < m_thread_num; ++i) {
-        Thread *t = m_threadpool[i];
-        t->start();
-    }
-    // TODO Remove
-    for (Thread *t : m_threadpool) {
-        t->join();
-    }
+    start_all_threads();
+    wait_for_threads();
     GameField *temp = next_field;
     next_field = current_field;
     current_field = temp;

@@ -19,8 +19,6 @@ private:
     uint upper_row;
     GameField* current;
     GameField* next;
-    vector<Lock*> lower_locks;
-    vector<Lock*> upper_locks;
 
     /**
      * Count the number of live neighbors of a given cell for the current state of the job's board
