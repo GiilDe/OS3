@@ -10,7 +10,7 @@ class GameField {
 private:
     uint width, height;
 public:
-    vector<vector<bool>> field;
+    vector< vector<bool> > field;
 
     explicit GameField(vector<vector<bool>>& matrix, uint width, uint height);
     uint get_height();

@@ -7,7 +7,7 @@
 int Job::countNeighbors(int i, int j) {
     uint width = current->get_width();
     uint height = current->get_height();
-    vector<vector<bool>> &current_matrix = current->field;
+    vector< vector<bool> >& current_matrix = current->field;
     uint neighbors = 0;
     for (int k = -1; k <= 1; ++k) {
         for (int z = -1; z <= 1; ++z) {
@@ -22,8 +22,8 @@ int Job::countNeighbors(int i, int j) {
 }
 
 void Job::run() {
-    vector<vector<bool>> &next_matrix = next->field;
-    vector<vector<bool>> &current_matrix = current->field;
+    vector< vector<bool> >& next_matrix = next->field;
+    vector< vector<bool> >& current_matrix = current->field;
 
     uint w = current->get_width();
     for (int i = lower_row; i <= upper_row; ++i) {

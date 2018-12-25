@@ -84,7 +84,7 @@ bool testGameBasic() {
     game_params attrs = {
             10,
             5,
-            "/Users/miki/CLionProjects/os_hw3/Tests/io/small.txt",
+            "../Tests/io/small.txt",
             true,
             true
     };

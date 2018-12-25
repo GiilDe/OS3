@@ -9,21 +9,6 @@
 --------------------------------------------------------------------------------*/
 
 
-/* Function sketch to use for printing the board. You will need to decide its placement and how exactly
-	to bring in the field's parameters.
-
-		cout << u8"╔" << string(u8"═") * field_width << u8"╗" << endl;
-		for (uint i = 0; i < field_height ++i) {
-			cout << u8"║";
-			for (uint j = 0; j < field_width; ++j) {
-				cout << (field[i][j] ? u8"█" : u8"░");
-			}
-			cout << u8"║" << endl;
-		}
-		cout << u8"╚" << string(u8"═") * field_width << u8"╝" << endl;
-*/
-
-
 Game::Game(game_params g) : m_gen_hist(), m_tile_hist(), m_threadpool() {
     interactive_on = g.interactive_on;
     print_on = g.print_on;
@@ -40,12 +25,28 @@ Game::~Game() {
 
 }
 
+void Game::start_all_threads(){
+    for (int i = 0; i < m_thread_num; ++i) {
+        Thread* t = m_threadpool[i];
+        t->start();
+    }
+}
+
+void Game::wait_for_threads(){
+    for (Thread *t : m_threadpool) {
+        t->join();
+    }
+}
+
 void Game::run() {
     _init_game(); // Starts the threads and all other variables you need
     print_board("Initial Board");
     for (uint i = 0; i < m_gen_num; ++i) {
         auto gen_start = std::chrono::system_clock::now();
         _step(i); // Iterates a single generation
+        if(i != m_gen_num-1){ //step killed all threads, if this is not the last
+            start_all_threads();//iteration, start them again
+        }
         auto gen_end = std::chrono::system_clock::now();
         m_gen_hist.push_back(
                 (float) std::chrono::duration_cast<std::chrono::microseconds>(gen_end - gen_start).count());
@@ -61,7 +62,7 @@ void Game::_init_game() {
     // Start the threads
     // Testing of your implementation will presume all threads are started here
     vector<string> lines = utils::read_lines(filename);
-    vector<vector<bool>> field;
+    vector< vector<bool> > field;
     for (int i = 0; i < lines.size(); ++i) {
         vector<string> line = utils::split(lines[i], ' ');
         field.push_back(vector<bool>());
@@ -79,31 +80,22 @@ void Game::_init_game() {
     for (int i = 0; i < m_thread_num; ++i) {
         m_threadpool.push_back(new GameThread(uint(i), &jobs));
     }
-    for (int i = 0; i < m_thread_num; ++i) {
-        Thread *t = m_threadpool[i];
-        t->start();
-    }
+    start_all_threads();
 }
 
 void Game::_step(uint curr_gen) {
     // Push jobs to queue
     // Wait for the workers to finish calculating
     // Swap pointers between current and next field
-    int height = (int)current_field->field.size();
-    int width = (int)current_field->field[0].size();
-    int job_size = height / m_thread_num;
-    vector<vector<Lock>> locks(m_thread_num - 1);
-    for(int i = 0; i < height; i++) {
-        locks.push_back(vector<Lock>());
-        for(int j = 0; j < width; j++) {
-            locks[i].push_back(Lock());
-        }
-    }
-    int start = 0;
-    int last = job_size - 1;
+    uint height = current_field->field.size();
+    uint width = current_field->field[0].size();
+    uint job_size = height / m_thread_num;
+    vector< vector<Lock> > locks(m_thread_num-1, vector<Lock>(width, Lock()));
+    uint start = 0;
+    uint last = job_size - 1;
     for (int i = 0; i < m_thread_num; ++i) {
-        vector<Lock *> lower_p(width, nullptr);
-        vector<Lock *> upper_p(width, nullptr);
+        vector< Lock* > lower_p(width, nullptr);
+        vector< Lock* > upper_p(width, nullptr);
         if (i != 0) { //if we are in the first job no need to lock...
             for (int k = 0; k < width; ++k) { //...lower_p (keep them NULL)
                 lower_p[k] = &locks[i - 1][k];
@@ -117,19 +109,14 @@ void Game::_step(uint curr_gen) {
                 upper_p[k] = &locks[i][k];
             }
         }
-        auto *j = new Job(uint(start), uint(last), current_field, next_field, lower_p, upper_p);
+        auto *j = new Job(start, last, current_field, next_field, lower_p, upper_p);
         jobs.push(j);
         start = last + 1;
         last += job_size;
     }
-    // TODO Remove
-    for (int i = 0; i < m_thread_num; ++i) {
-        Thread *t = m_threadpool[i];
-        t->start();
-    }
-    for (Thread *t : m_threadpool) {
-        t->join();
-    }
+
+    wait_for_threads(); //wait for all threads to be destroyed
+
     GameField *temp = next_field;
     next_field = current_field;
     current_field = temp;
@@ -141,6 +128,9 @@ void Game::_destroy_game() {
     // Testing of your implementation will presume all threads are joined here
     delete current_field;
     delete next_field;
+    for (int i = 0; i < m_thread_num; ++i) { //delete the threads
+        delete m_threadpool[i];
+    }
 }
 
 const vector<float> Game::gen_hist() const {
