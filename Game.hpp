@@ -60,5 +60,6 @@ protected: // All members here are protected, instead of private for testing pur
     GameField *current_field, *next_field;
     PCQueue<Job*> jobs;
 	string filename;
+	bool finished;
 };
 #endif

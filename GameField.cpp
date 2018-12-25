@@ -11,11 +11,11 @@ GameField::GameField(vector<vector<bool>>& matrix, uint width, uint height) :
 }
 
 uint GameField::get_height() {
-    return width;
+    return height;
 }
 
 uint GameField::get_width(){
-    return height;
+    return width;
 }
 
 vector<bool>& GameField::operator[](int i) {

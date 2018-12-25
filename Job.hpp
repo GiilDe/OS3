@@ -11,15 +11,7 @@
 
 class Job {
 public:
-    Job (uint lower, uint upper, GameField* current, GameField* next,
-         vector<Lock*>& lower_s, vector<Lock*>& upper_s) {
-        lower_row = lower;
-        upper_row = upper;
-        this->current = current;
-        this->next = next;
-        this->lower_locks = lower_s;
-        this->upper_locks = upper_s;
-    }
+    Job (uint lower, uint upper, GameField* current, GameField* next);
     void run();
 
 private:

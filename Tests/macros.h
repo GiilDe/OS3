@@ -4,6 +4,7 @@
 #include <exception>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <string>
 #include <cstdlib>
 
@@ -13,6 +14,9 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::exception;
+using std::ifstream;
+
+using namespace std;
 
 /**
  * ANSI-C color "manipulators"
@@ -69,6 +73,8 @@ using std::exception;
     try{ \
         if((a) != (b)){\
             PRINT_ERROR((string(#a) + " != " + string(#b))); \
+            PRINT_ERROR(a); \
+            PRINT_ERROR(b); \
             return false;\
         } \
     } catch(const exception& e) { \
@@ -137,6 +143,7 @@ using std::exception;
     exit(0);
 
 #define RUN_TEST(t) \
+    cout << "Running " << #t << "..." << endl; \
     try { \
         if(t()){ \
             cout << REVERSED << #t << NORMAL_TEXT << ":" << GREEN << " PASS ✓" <<  NORMAL_TEXT << endl; \
@@ -184,6 +191,19 @@ using std::exception;
         code \
     } while (0);
 
+#define COUT_REDIR_FILE "temp"
+
+#define REDIRECT_COUT(buf) \
+    buf.open(COUT_REDIR_FILE, ios::out); \
+    auto oldbuf = cout.rdbuf(&buf);
+
+#define END_REDIRECT_COUT() \
+    cout.rdbuf(oldbuf);
+
+string cout_redir_str() {
+    ifstream f1(COUT_REDIR_FILE);
+    return string(std::istreambuf_iterator<char>(f1), std::istreambuf_iterator<char>());
+}
 
 bool VerifyOutput(ostringstream& output, const string& expected_output){
     if(expected_output != output.str()){

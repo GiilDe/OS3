@@ -65,43 +65,50 @@ bool testThreadWrapper() {
     return true;
 }
 
-bool testGameBasic() {
-//    char cCurrentPath[FILENAME_MAX];
-//
-//    if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath)))
-//    {
-//        return false;
-//    }
-//
-//    cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
-//
-//    printf ("The current working directory is %s", cCurrentPath);
-
-    filebuf buf;
-    buf.open("temp", ios::out);
-//    auto oldbuf = cout.rdbuf(&buf);
-
+static inline game_params newGame(uint gens, uint threads, string filename, bool animated, bool print) {
     game_params attrs = {
-            10,
-            5,
-            "../Tests/io/small.txt",
-            true,
-            true
+            gens,
+            threads,
+            filename,
+            animated,
+            print
     };
-    Game game(attrs);
+    return attrs;
+}
+
+string testGameBasicThreads(uint threads) {
+    filebuf buf;
+    REDIRECT_COUT(buf);
+
+    Game game(newGame(10, threads, "/Users/miki/CLionProjects/os_hw3/Tests/io/small.txt", false, true));
     game.run();
 
-//    cout.rdbuf(oldbuf);
+    END_REDIRECT_COUT();
+    string out = cout_redir_str();
+    return out;
+}
 
-    ifstream f1("temp");
-    string str1((istreambuf_iterator<char>(f1)), istreambuf_iterator<char>());
-//    ASSERT_EQUALS(str1, small_board_expected);
+bool testGameBasic1() {
+    ASSERT_EQUALS(testGameBasicThreads(1), small_board_expected);
+    return true;
+}
 
+bool testGameBasic2() {
+    ASSERT_EQUALS(testGameBasicThreads(2), small_board_expected);
+    return true;
+}
+
+bool testGameBasic3() {
+    ASSERT_EQUALS(testGameBasicThreads(7), small_board_expected);
     return true;
 }
 
 int main() {
     RUN_TEST(testThreadWrapper);
-    RUN_TEST(testGameBasic);
+    RUN_TEST(testGameBasic1);
+    sleep(5);
+    RUN_TEST(testGameBasic2);
+    sleep(5);
+    RUN_TEST(testGameBasic3);
     return 0;
 }

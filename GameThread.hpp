@@ -17,6 +17,7 @@ public:
 private:
     PCQueue<Job*>* jobs;
     vector<Job*> my_jobs;
+    vector<float>* tile_hist;
     void thread_workload() override;
 };
 
